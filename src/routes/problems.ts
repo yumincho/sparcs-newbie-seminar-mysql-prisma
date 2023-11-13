@@ -73,16 +73,18 @@ router.get("/02", async (_: any, res: any) => {
 
 router.get("/03", async (_: any, res: any) => {
   try {
-    const temp = await prisma.customer.findMany({
-      select: {
-        income: true,
-      },
-      where: {
-        lastName: "Butler",
-      },
-    });
-
-    const max = Math.max(...temp.map((o: any) => o.income));
+    const max = Math.max(
+      ...(
+        await prisma.customer.findMany({
+          select: {
+            income: true,
+          },
+          where: {
+            lastName: "Butler",
+          },
+        })
+      ).map((o: any) => o.income)
+    );
 
     const customers = await prisma.customer.findMany({
       select: {
@@ -105,6 +107,80 @@ router.get("/03", async (_: any, res: any) => {
     });
 
     debug(customers);
+    res.json(customers);
+  } catch (e) {
+    return res.status(500).json({ error: e });
+  }
+});
+
+router.get("/04", async (_: any, res: any) => {
+  try {
+    const customerIDSet = await prisma.customer.findMany({
+      select: {
+        customerID: true,
+        // Owns: {
+        //   select: {
+        //     Account: {
+        //       select: {
+        //         Branch: {
+        //           select: { branchName: true },
+        //         },
+        //       },
+        //     },
+        //   },
+        // },
+      },
+      distinct: "customerID",
+      where: {
+        Owns: {
+          some: {
+            Account: {
+              Branch: {
+                branchName: {
+                  in: ["London", "Latveria"],
+                },
+              },
+            },
+          },
+        },
+      },
+      orderBy: [{ customerID: "asc" }],
+    });
+
+    const customers = await prisma.customer.findMany({
+      select: {
+        customerID: true,
+        income: true,
+        Owns: {
+          select: {
+            accNumber: true,
+            Account: {
+              select: {
+                Branch: {
+                  select: { branchName: true },
+                },
+              },
+            },
+          },
+        },
+      },
+      where: {
+        AND: [
+          {
+            income: {
+              gt: 80000,
+            },
+          },
+          {
+            customerID: {
+              in: customerIDSet.map((el) => el.customerID),
+            },
+          },
+        ],
+      },
+      orderBy: [{ customerID: "asc" }],
+    });
+
     res.json(customers);
   } catch (e) {
     return res.status(500).json({ error: e });
