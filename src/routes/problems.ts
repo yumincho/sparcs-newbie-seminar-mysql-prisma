@@ -5,9 +5,9 @@ const router = express.Router();
 
 const prisma = new PrismaClient();
 
-function debug(result: JSON) {
-  console.log("result length: ", result.length);
-}
+// function debug(result: JSON) {
+//   console.log("result length: ", result.length);
+// }
 
 router.get("/01", async (_: any, res: any) => {
   try {
@@ -106,7 +106,6 @@ router.get("/03", async (_: any, res: any) => {
       ],
     });
 
-    debug(customers);
     res.json(customers);
   } catch (e) {
     return res.status(500).json({ error: e });
@@ -118,17 +117,6 @@ router.get("/04", async (_: any, res: any) => {
     const customerIDSet = await prisma.customer.findMany({
       select: {
         customerID: true,
-        // Owns: {
-        //   select: {
-        //     Account: {
-        //       select: {
-        //         Branch: {
-        //           select: { branchName: true },
-        //         },
-        //       },
-        //     },
-        //   },
-        // },
       },
       distinct: "customerID",
       where: {
@@ -182,6 +170,62 @@ router.get("/04", async (_: any, res: any) => {
     });
 
     res.json(customers);
+  } catch (e) {
+    return res.status(500).json({ error: e });
+  }
+});
+
+router.get("/05", async (_: any, res: any) => {
+  try {
+    const customerInfo = await prisma.customer.findMany({
+      select: {
+        customerID: true,
+        Owns: {
+          select: {
+            accNumber: true,
+            Account: {
+              select: {
+                type: true,
+                balance: true,
+              },
+            },
+          },
+        },
+      },
+      orderBy: [{ customerID: "asc" }],
+    });
+
+    const customers = customerInfo.map(
+      (el: {
+        customerID: number;
+        Owns: {
+          accNumber: number;
+          Account: {
+            type: string | null;
+            balance: string | null;
+          };
+        }[];
+      }) => ({
+        customerID: el.customerID,
+        Owns: el.Owns.filter((own) => {
+          return own.Account.type === "BUS" || own.Account.type === "SAV";
+        }).map((own) => ({
+          type: own.Account.type,
+          acc: own.accNumber,
+        })),
+      })
+    );
+
+    const filtered = customers
+      .filter((el) => {
+        return el.Owns.length !== 0;
+      })
+      .sort(function (a: any, b: any) {
+        return -a.salaryGap + b.salaryGap;
+      });
+
+    console.log(filtered);
+    res.json(filtered);
   } catch (e) {
     return res.status(500).json({ error: e });
   }
