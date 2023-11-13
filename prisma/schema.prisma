@@ -25,7 +25,7 @@ model Branch {
   managerSIN                             Int?
   budget                                 String?    @db.Text
   Account                                Account[]
-  Employee_Branch_managerSINToEmployee   Employee?  @relation("Branch_managerSINToEmployee", fields: [managerSIN], references: [sin], onDelete: Restrict, onUpdate: Restrict, map: "Branch_ibfk_1")
+  Employee   Employee?  @relation("Branch_managerSINToEmployee", fields: [managerSIN], references: [sin], onDelete: Restrict, onUpdate: Restrict, map: "Branch_ibfk_1")
   Employee_Employee_branchNumberToBranch Employee[] @relation("Employee_branchNumberToBranch")
 
   @@index([managerSIN], map: "managerSIN")
@@ -47,7 +47,7 @@ model Employee {
   salary                               Int?
   branchNumber                         Int?
   Branch_Branch_managerSINToEmployee   Branch[] @relation("Branch_managerSINToEmployee")
-  Branch_Employee_branchNumberToBranch Branch?  @relation("Employee_branchNumberToBranch", fields: [branchNumber], references: [branchNumber], onDelete: Restrict, onUpdate: Restrict, map: "Employee_ibfk_1")
+  Branch                               Branch?  @relation("Employee_branchNumberToBranch", fields: [branchNumber], references: [branchNumber], onDelete: Restrict, onUpdate: Restrict, map: "Employee_ibfk_1")
 
   @@index([branchNumber], map: "branchNumber")
 }
