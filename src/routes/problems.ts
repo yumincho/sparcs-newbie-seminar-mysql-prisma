@@ -5,10 +5,6 @@ const router = express.Router();
 
 const prisma = new PrismaClient();
 
-// function debug(result: JSON) {
-//   console.log("result length: ", result.length);
-// }
-
 router.get("/01", async (_: any, res: any) => {
   try {
     const customers = await prisma.customer.findMany({
@@ -32,7 +28,6 @@ router.get("/01", async (_: any, res: any) => {
       ],
     });
 
-    // debug(customers);
     res.json(customers);
   } catch (e) {
     return res.status(500).json({ error: e });
@@ -192,7 +187,7 @@ router.get("/05", async (_: any, res: any) => {
           },
         },
       },
-      orderBy: [{ customerID: "asc" }],
+      // orderBy: [{ customerID: "asc" }],
     });
 
     const customers = customerInfo.map(
