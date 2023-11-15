@@ -25,7 +25,7 @@ model Branch {
   managerSIN                             Int?
   budget                                 String?    @db.Text
   Account                                Account[]
-  Employee   Employee?  @relation("Branch_managerSINToEmployee", fields: [managerSIN], references: [sin], onDelete: Restrict, onUpdate: Restrict, map: "Branch_ibfk_1")
+  Employee                               Employee?  @relation("Branch_managerSINToEmployee", fields: [managerSIN], references: [sin], onDelete: Restrict, onUpdate: Restrict, map: "Branch_ibfk_1")
   Employee_Employee_branchNumberToBranch Employee[] @relation("Employee_branchNumberToBranch")
 
   @@index([managerSIN], map: "managerSIN")
@@ -41,13 +41,14 @@ model Customer {
 }
 
 model Employee {
-  sin                                  Int      @id
-  firstName                            String?  @db.VarChar(20)
-  lastName                             String?  @db.VarChar(20)
-  salary                               Int?
-  branchNumber                         Int?
-  Branch_Branch_managerSINToEmployee   Branch[] @relation("Branch_managerSINToEmployee")
-  Branch                               Branch?  @relation("Employee_branchNumberToBranch", fields: [branchNumber], references: [branchNumber], onDelete: Restrict, onUpdate: Restrict, map: "Employee_ibfk_1")
+  sin                                Int      @id
+  firstName                          String?  @db.VarChar(20)
+  lastName                           String?  @db.VarChar(20)
+  salary                             Int?
+  branchNumber                       Int?
+  deleted                            Boolean  @default(false)
+  Branch_Branch_managerSINToEmployee Branch[] @relation("Branch_managerSINToEmployee")
+  Branch                             Branch?  @relation("Employee_branchNumberToBranch", fields: [branchNumber], references: [branchNumber], onDelete: Restrict, onUpdate: Restrict, map: "Employee_ibfk_1")
 
   @@index([branchNumber], map: "branchNumber")
 }
